@@ -91,6 +91,17 @@ class SecondBrainRAG:
 
         return self.generator.generate_answer(query=question, retrieved_chunks=retrieved_chunks)
 
+    def query(
+        self,
+        question: str,
+        k: int = TOP_K_RESULTS,
+        collection_name: str = "second_brain_docs"
+    ) -> Dict[str, Any]:
+        """
+        Alias for ask(). Queries the indexed knowledge base and generates a grounded response.
+        """
+        return self.ask(question=question, k=k, collection_name=collection_name)
+
     def reset_knowledge_base(self, collection_name: str = "second_brain_docs"):
         """Clears the stored vector collection."""
         self.vector_store.clear_collection(collection_name)
