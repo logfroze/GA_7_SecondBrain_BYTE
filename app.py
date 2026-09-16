@@ -1,5 +1,6 @@
 import os
 import streamlit as st
+import streamlit.components.v1 as components
 from pathlib import Path
 
 from src.rag_pipeline import SecondBrainRAG
@@ -16,12 +17,96 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# Clean, Restrained Developer UI Styling
-# Solid colors, subtle borders, sharp typography, zero AI/template decorations.
+# Dynamic Adaptive Theming: Dark Mode & Full Light Mode System
+# High-contrast, clean developer aesthetic across all surfaces and states.
 # ==============================================================================
 DEV_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Default Dark Theme Design Tokens */
+:root, [data-theme="dark"] {
+    --app-bg: #0d1117;
+    --sidebar-bg: #090d13;
+    --card-bg: #161b22;
+    --border-color: #21262d;
+    --border-subtle: #30363d;
+    --border-hover: #8b949e;
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    --text-val: #c9d1d9;
+    --btn-bg: #21262d;
+    --btn-border: #30363d;
+    --btn-text: #e6edf3;
+    --btn-hover-bg: #30363d;
+    --danger-text: #f85149;
+    --citation-bg: #161b22;
+    --citation-border: #30363d;
+    --citation-text: #58a6ff;
+    --header-icon: #c9d1d9;
+    --header-hover-bg: #21262d;
+    --accent-color: #58a6ff;
+    --code-bg: #161b22;
+    --code-text: #e6edf3;
+}
+
+/* Light Theme Design Tokens (Full view coverage, high contrast) */
+:root[data-theme="light"],
+body[data-theme="light"],
+.stApp[data-theme="light"],
+[data-theme="light"] {
+    --app-bg: #ffffff;
+    --sidebar-bg: #f6f8fa;
+    --card-bg: #ffffff;
+    --border-color: #d0d7de;
+    --border-subtle: #d8dee4;
+    --border-hover: #656d76;
+    --text-primary: #1f2328;
+    --text-secondary: #59636e;
+    --text-val: #24292f;
+    --btn-bg: #f6f8fa;
+    --btn-border: #d0d7de;
+    --btn-text: #24292f;
+    --btn-hover-bg: #eaeef2;
+    --danger-text: #cf222e;
+    --citation-bg: #ddf4ff;
+    --citation-border: #54aeff80;
+    --citation-text: #0969da;
+    --header-icon: #59636e;
+    --header-hover-bg: #eaeef2;
+    --accent-color: #0969da;
+    --code-bg: #f6f8fa;
+    --code-text: #24292f;
+}
+
+/* System preference fallback */
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]),
+    .stApp:not([data-theme="dark"]) {
+        --app-bg: #ffffff;
+        --sidebar-bg: #f6f8fa;
+        --card-bg: #ffffff;
+        --border-color: #d0d7de;
+        --border-subtle: #d8dee4;
+        --border-hover: #656d76;
+        --text-primary: #1f2328;
+        --text-secondary: #59636e;
+        --text-val: #24292f;
+        --btn-bg: #f6f8fa;
+        --btn-border: #d0d7de;
+        --btn-text: #24292f;
+        --btn-hover-bg: #eaeef2;
+        --danger-text: #cf222e;
+        --citation-bg: #ddf4ff;
+        --citation-border: #54aeff80;
+        --citation-text: #0969da;
+        --header-icon: #59636e;
+        --header-hover-bg: #eaeef2;
+        --accent-color: #0969da;
+        --code-bg: #f6f8fa;
+        --code-text: #24292f;
+    }
+}
 
 html, body, [class*="css"], .stMarkdown {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
@@ -42,7 +127,7 @@ div[data-testid="stToolbar"] > div:has(.stAppDeployButton) {
 /* Header, 3-dots menu, and sidebar toggle arrow */
 header[data-testid="stHeader"] {
     background: transparent !important;
-    color: #e6edf3 !important;
+    color: var(--text-primary) !important;
 }
 
 #MainMenu,
@@ -53,51 +138,52 @@ header[data-testid="stHeader"] {
     visibility: visible !important;
 }
 
-/* Ensure 3 dots and sidebar arrow icons are clean and visible */
 header[data-testid="stHeader"] button,
 [data-testid="collapsedControl"] button,
 [data-testid="stSidebarCollapseButton"] button {
-    color: #c9d1d9 !important;
+    color: var(--header-icon) !important;
     background-color: transparent !important;
 }
 
 header[data-testid="stHeader"] button:hover,
 [data-testid="collapsedControl"] button:hover,
 [data-testid="stSidebarCollapseButton"] button:hover {
-    color: #ffffff !important;
-    background-color: #21262d !important;
+    color: var(--text-primary) !important;
+    background-color: var(--header-hover-bg) !important;
 }
 
-/* Solid Neutral Developer Dark Theme */
+/* Main App Canvas */
 .stApp {
-    background-color: #0d1117 !important;
-    color: #e6edf3 !important;
+    background-color: var(--app-bg) !important;
+    color: var(--text-primary) !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Sidebar */
 section[data-testid="stSidebar"] {
-    background-color: #090d13 !important;
-    border-right: 1px solid #21262d !important;
+    background-color: var(--sidebar-bg) !important;
+    border-right: 1px solid var(--border-color) !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 /* App Header */
 .dev-header {
     padding: 4px 0 16px 0;
-    border-bottom: 1px solid #21262d;
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: 20px;
 }
 
 .dev-title {
     font-size: 1.35rem;
     font-weight: 600;
-    color: #f0f6fc;
+    color: var(--text-primary);
     margin: 0;
     letter-spacing: -0.01em;
 }
 
 .dev-subtitle {
     font-size: 0.825rem;
-    color: #8b949e;
+    color: var(--text-secondary);
     margin-top: 4px;
     margin-bottom: 0;
 }
@@ -108,36 +194,36 @@ section[data-testid="stSidebar"] {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #8b949e;
+    color: var(--text-secondary);
     margin-top: 14px;
     margin-bottom: 8px;
 }
 
-/* File Uploader Dropzone - Seamless dark styling across themes */
+/* File Uploader Dropzone */
 [data-testid="stFileUploadDropzone"] {
-    background-color: #161b22 !important;
-    border: 1px dashed #30363d !important;
+    background-color: var(--card-bg) !important;
+    border: 1px dashed var(--border-subtle) !important;
     border-radius: 6px !important;
 }
 
 [data-testid="stFileUploadDropzone"] div,
 [data-testid="stFileUploadDropzone"] span,
 [data-testid="stFileUploadDropzone"] small {
-    color: #8b949e !important;
+    color: var(--text-secondary) !important;
 }
 
 [data-testid="stFileUploadDropzone"] button {
-    background-color: #21262d !important;
-    color: #e6edf3 !important;
-    border: 1px solid #30363d !important;
+    background-color: var(--btn-bg) !important;
+    color: var(--btn-text) !important;
+    border: 1px solid var(--btn-border) !important;
 }
 
 /* Status Table */
 .status-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #0d1117;
-    border: 1px solid #21262d;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.8rem;
     margin-top: 6px;
@@ -145,7 +231,7 @@ section[data-testid="stSidebar"] {
 }
 
 .status-table tr {
-    border-bottom: 1px solid #21262d;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .status-table tr:last-child {
@@ -157,13 +243,13 @@ section[data-testid="stSidebar"] {
 }
 
 .status-table td.label {
-    color: #8b949e;
+    color: var(--text-secondary);
     font-weight: 500;
     width: 42%;
 }
 
 .status-table td.val {
-    color: #c9d1d9;
+    color: var(--text-val);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.76rem;
     text-align: right;
@@ -179,11 +265,11 @@ section[data-testid="stSidebar"] {
     vertical-align: middle;
 }
 
-/* Solid Developer Buttons */
+/* Action Buttons */
 div.stButton > button {
-    background-color: #21262d !important;
-    color: #e6edf3 !important;
-    border: 1px solid #30363d !important;
+    background-color: var(--btn-bg) !important;
+    color: var(--btn-text) !important;
+    border: 1px solid var(--btn-border) !important;
     border-radius: 6px !important;
     font-weight: 500 !important;
     font-size: 0.8125rem !important;
@@ -193,90 +279,182 @@ div.stButton > button {
 }
 
 div.stButton > button:hover {
-    background-color: #30363d !important;
-    border-color: #8b949e !important;
-    color: #ffffff !important;
+    background-color: var(--btn-hover-bg) !important;
+    border-color: var(--border-hover) !important;
+    color: var(--text-primary) !important;
     box-shadow: none !important;
     transform: none !important;
 }
 
 /* Primary Index Button */
 div.stButton > button[kind="primary"] {
-    background-color: #238636 !important;
-    border-color: rgba(240, 246, 252, 0.1) !important;
+    background-color: #1f883d !important;
+    border-color: rgba(31, 136, 61, 0.4) !important;
     color: #ffffff !important;
 }
 
 div.stButton > button[kind="primary"]:hover {
-    background-color: #2ea043 !important;
+    background-color: #1a7f37 !important;
 }
 
-/* Danger / Reset Button Specific Styling */
+/* Danger / Reset Button */
 .danger-action button {
-    background-color: #21262d !important;
-    color: #f85149 !important;
-    border-color: #30363d !important;
+    background-color: var(--btn-bg) !important;
+    color: var(--danger-text) !important;
+    border-color: var(--btn-border) !important;
 }
 
 .danger-action button:hover {
-    background-color: #b62324 !important;
+    background-color: #cf222e !important;
     color: #ffffff !important;
-    border-color: #b62324 !important;
+    border-color: #cf222e !important;
 }
 
 /* Citations Tags */
 .citation-tag {
     display: inline-block;
-    padding: 1px 6px;
-    background-color: #161b22;
-    border: 1px solid #30363d;
+    padding: 2px 8px;
+    background-color: var(--citation-bg);
+    border: 1px solid var(--citation-border);
     border-radius: 4px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.75rem;
-    color: #58a6ff;
+    color: var(--citation-text);
+    font-weight: 500;
     margin-right: 6px;
     margin-top: 4px;
 }
 
 /* Chat Messages */
 [data-testid="stChatMessage"] {
-    background-color: #161b22 !important;
-    border: 1px solid #21262d !important;
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
     border-radius: 6px !important;
     padding: 14px !important;
     margin-bottom: 10px !important;
+}
+
+[data-testid="stChatMessage"] p,
+[data-testid="stChatMessage"] span,
+[data-testid="stChatMessage"] div {
+    color: var(--text-primary) !important;
 }
 
 /* Bottom Floating Container & Chat Input Bar */
 [data-testid="stBottom"],
 [data-testid="stBottom"] > div,
 .stChatFloatingInputContainer {
-    background-color: #0d1117 !important;
-    background: #0d1117 !important;
+    background-color: var(--app-bg) !important;
+    background: var(--app-bg) !important;
 }
 
 .stChatInputContainer {
-    background-color: #0d1117 !important;
-    border: 1px solid #30363d !important;
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-subtle) !important;
     border-radius: 6px !important;
     box-shadow: none !important;
 }
 
 .stChatInputContainer:focus-within {
-    border-color: #58a6ff !important;
+    border-color: var(--accent-color) !important;
 }
 
-/* Expander */
+.stChatInputContainer textarea {
+    color: var(--text-primary) !important;
+    background-color: transparent !important;
+}
+
+/* Expander & Code Blocks */
 .streamlit-expanderHeader {
-    background-color: #161b22 !important;
-    border: 1px solid #21262d !important;
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
     border-radius: 4px !important;
     font-size: 0.8rem !important;
-    color: #8b949e !important;
+    color: var(--text-secondary) !important;
+}
+
+[data-testid="stCodeBlock"] {
+    background-color: var(--code-bg) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Invisible Theme Sync Component */
+div[data-testid="stCustomComponentV1"]:has(iframe),
+div:has(> iframe[height="0"]),
+iframe[height="0"] {
+    display: none !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
 }
 </style>
 """
 st.markdown(DEV_CSS, unsafe_allow_html=True)
+
+# Theme Synchronizer Component
+# Monitors Streamlit's internal theme changes (Light / Dark) and syncs data-theme attribute
+components.html(
+    """
+    <script>
+    (function() {
+        function syncTheme() {
+            try {
+                const parentDoc = window.parent.document;
+                const stApp = parentDoc.querySelector('.stApp');
+                if (!stApp) return;
+
+                let theme = null;
+
+                // 1. Check Streamlit's active theme in settings radio menu if selected
+                const checkedRadio = parentDoc.querySelector('[data-testid="stThemeSwitcher"] [aria-checked="true"]');
+                if (checkedRadio) {
+                    const txt = (checkedRadio.innerText || checkedRadio.getAttribute('aria-label') || '').toLowerCase();
+                    if (txt.includes('light')) theme = 'light';
+                    else if (txt.includes('dark')) theme = 'dark';
+                }
+
+                // 2. Check computed colorScheme on stApp
+                if (!theme) {
+                    const comp = window.parent.getComputedStyle(stApp);
+                    if (comp.colorScheme === 'light') {
+                        theme = 'light';
+                    } else if (comp.colorScheme === 'dark') {
+                        theme = 'dark';
+                    }
+                }
+
+                // 3. Check system media preference as fallback
+                if (!theme) {
+                    if (window.parent.matchMedia && window.parent.matchMedia('(prefers-color-scheme: light)').matches) {
+                        theme = 'light';
+                    } else {
+                        theme = 'dark';
+                    }
+                }
+
+                // Synchronize data-theme across DOM roots
+                if (parentDoc.documentElement.getAttribute('data-theme') !== theme) {
+                    parentDoc.documentElement.setAttribute('data-theme', theme);
+                }
+                if (parentDoc.body && parentDoc.body.getAttribute('data-theme') !== theme) {
+                    parentDoc.body.setAttribute('data-theme', theme);
+                }
+                if (stApp.getAttribute('data-theme') !== theme) {
+                    stApp.setAttribute('data-theme', theme);
+                }
+            } catch (e) {}
+        }
+        syncTheme();
+        setInterval(syncTheme, 250);
+    })();
+    </script>
+    """,
+    height=0,
+    width=0,
+)
 
 
 # ==============================================================================
@@ -425,7 +603,10 @@ if active_query:
     with st.chat_message("assistant"):
         with st.spinner("Retrieving context & generating answer..."):
             try:
-                result = st.session_state.rag.query(active_query)
+                if hasattr(st.session_state.rag, "query"):
+                    result = st.session_state.rag.query(active_query)
+                else:
+                    result = st.session_state.rag.ask(active_query)
                 answer = result.get("answer", "")
                 citations = result.get("citations", [])
                 sources = result.get("sources", [])
